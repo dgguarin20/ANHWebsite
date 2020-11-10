@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Fetch the data</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+  <style>
+body {
+   background-image: url('https://github.com/dgguarin20/webdata/blob/main/background1.jpg?raw=true');
+   background-repeat: no-repeat;
+   background-attachment: fixed;
+   background-size: cover;
+}
+
+.button {
+  background-color: #28847C; /* Green */
+  border: none;
+  color: white;
+  border-radius: 8px;
+  padding: 12px 24px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+.titles{
+  color: white;
+}
+</style>
+  </head>
+  <body>
+
+
+    <h3 class = 'titles'> GRAFICA DE LOS DATOS DE DE LA ANH </h3>
+
+    <select id="valores" name="values" onchange= "cuandoClick()">
+    </select>
+
+    <canvas id = "chart" width="5" height = "2"></canvas>
+    <button  class = "button" id="btn1">
+    Empresa
+    </button>
+    <button  class = "button" id="btn2">
+    Departamento
+    </button>
+    <button  class = "button" id="btn3">
+    Campo
+    </button>
+    <button  class = "button" id="btn4">
+    Contrato
+    </button>
+    <button  class = "button" id="cambiar">
+    Cambiar tipo de Grafica
+    </button>
+    <button class = "button" id="mesyear">
+    Mes/Year
+    </button>
+    <button  class = "button" id="all">
+     Todos por año.
+    </button>
+    <script>
+
+
+
+
+      var dropdown = [];
+      var xlabels = [];
+      var ytemps = [];
+      var nombre = 'v';
+      var url = sessionStorage.getItem("url");
+      var numColumna = sessionStorage.getItem("column");
+      var tipoGrafica = sessionStorage.getItem("type");
+      var dataValues;
+      var regresar;
+      if (numColumna == null ) {
+        numColumna = 1;
+      }
+      if (tipoGrafica == null ) {
+        tipoGrafica = 'line';
+      }
+
+      if (url == null ) {
+        url = "";
+      }
+      else {
+        optionsDisplay();
+        chartIt();
+      }
+
+      function optionsDisplay()
+      {
+        dataValues  = document.getElementById("valores").options;
+        regresar = document.getElementById("valores");
+        //183 empresa/47 Departamento/ 1207 Campo / 745 Contrato
+        numeroOpt = 0;
+        if(url == "https://raw.githubusercontent.com/dgguarin20/webdata/main/Empresa.csv" || url == "https://raw.githubusercontent.com/dgguarin20/webdata/main/Empresa_year.csv" )
+        {
+          numeroOpt = 90;
+        }
+        else if(url == "https://raw.githubusercontent.com/dgguarin20/webdata/main/Departamento.csv" || url == "https://raw.githubusercontent.com/dgguarin20/webdata/main/Departamento_year.csv"  ){
+          numeroOpt = 24;
+        }
+        else if(url == "https://raw.githubusercontent.com/dgguarin20/webdata/main/Campo.csv"|| url == "https://raw.githubusercontent.com/dgguarin20/webdata/main/Campo_year.csv"  ){
+          numeroOpt = 604;
+        }
+        else if(url == "https://raw.githubusercontent.com/dgguarin20/webdata/main/Contrato.csv"|| url == "https://raw.githubusercontent.com/dgguarin20/webdata/main/Contrato_year.csv"  ){
+          numeroOpt = 373;
+        }
+
+        for(var i = 1; i < numeroOpt; i++)
+        {
+          var dataValue = document.createElement('option');
+          dataValue.value = i;
+          dataValue.id = i;
+          dataValue.text = i;
+          dataValues.add(dataValue);
+        }
+      }
+      function cuandoClick(){
+        var datass = document.getElementById('valores');
+        numColumna = datass.value;
+        numColumna = numColumna -1;
+        window.sessionStorage.setItem("column", numColumna);
+        window.location.reload();
+
+      }
+
+      async function chartIt(){
+
+
+      await  getData();
+
+
+      for(var i = 1; i < numeroOpt; i++)
+      {
+        var datValues  = document.getElementById(i);
+        datValues.text = dropdown[i];
+      }
+
+      const ctx = document.getElementById('chart').getContext('2d');
+      var myChart = new Chart(ctx, {
+      type: tipoGrafica ,
+      data: {
+          labels: xlabels,
+          datasets: [{
+              label: nombre,
+              data: ytemps,
+              fill: false,
+              backgroundColor: 'rgba(28, 206, 164, 0.2)',
+              borderColor: 'rgba(89, 241, 206, 1)',
+              borderWidth: 1
+          }]
+      },
+      options: {
+        legend: {
+    labels: {
+        fontColor: "white",
+        fontSize: 18
+    }
+},
+          scales: {
+              yAxes: [{
+                  ticks: {
+                      fontColor: "white",
+                      beginAtZero: true
+                  }
+              }],
+              xAxes: [{
+                  ticks: {
+                      fontColor: "white"
+
+                  }
+              }],
+
+          }
+      }
+  });
+
+}
+
+
+     var boton1 = document.getElementById("btn1");
+     boton1.onclick = function(event) {
+       url = 'https://raw.githubusercontent.com/dgguarin20/webdata/main/Empresa.csv';
+       window.sessionStorage.setItem("url", url);
+       window.location.reload();
+    }
+    var boton2 = document.getElementById("btn2");
+    boton2.onclick = function(event) {
+       url = 'https://raw.githubusercontent.com/dgguarin20/webdata/main/Departamento.csv';
+       window.sessionStorage.setItem("url", url);
+       window.location.reload();
+
+   }
+   var boton3 = document.getElementById("btn3");
+   boton3.onclick = function(event) {
+      url = 'https://raw.githubusercontent.com/dgguarin20/webdata/main/Campo.csv';
+      window.sessionStorage.setItem("url", url);
+      window.location.reload();
+
+  }
+  var boton4 = document.getElementById("btn4");
+  boton4.onclick = function(event) {
+     url = 'https://raw.githubusercontent.com/dgguarin20/webdata/main/Contrato.csv';
+     window.sessionStorage.setItem("url", url);
+     window.location.reload();
+
+ }
+ var todosBoton = document.getElementById("all");
+ todosBoton.onclick = function(event) {
+    url = 'https://raw.githubusercontent.com/dgguarin20/webdata/main/all.csv';
+    numColumna = 1;
+    window.sessionStorage.setItem("url", url);
+    window.sessionStorage.setItem("column", numColumna);
+    window.location.reload();
+
+}
+
+ var cambiarBoton = document.getElementById("cambiar");
+ cambiarBoton.onclick = function(event) {
+    if (tipoGrafica == 'line')
+    {
+      tipoGrafica = 'bar';
+    }
+    else {
+      tipoGrafica = 'line';
+    }
+    window.sessionStorage.setItem("type", tipoGrafica);
+    window.location.reload();
+
+}
+var mesButton = document.getElementById("mesyear");
+mesButton.onclick = function(event) {
+  if (url == 'https://raw.githubusercontent.com/dgguarin20/webdata/main/Empresa.csv')
+  {
+    url ='https://raw.githubusercontent.com/dgguarin20/webdata/main/Empresa_year.csv';
+    window.sessionStorage.setItem("url", url);
+    window.location.reload();
+  }
+  else if (url == 'https://raw.githubusercontent.com/dgguarin20/webdata/main/Departamento.csv') {
+
+    url = 'https://raw.githubusercontent.com/dgguarin20/webdata/main/Departamento_year.csv';
+    window.sessionStorage.setItem("url", url);
+    window.location.reload();
+  }
+  else if (url == 'https://raw.githubusercontent.com/dgguarin20/webdata/main/Campo.csv') {
+
+    url = 'https://raw.githubusercontent.com/dgguarin20/webdata/main/Campo_year.csv';
+    window.sessionStorage.setItem("url", url);
+    window.location.reload();
+  }
+  else if (url == 'https://raw.githubusercontent.com/dgguarin20/webdata/main/Contrato.csv') {
+    url = 'https://raw.githubusercontent.com/dgguarin20/webdata/main/Contrato_year.csv';
+    window.sessionStorage.setItem("url", url);
+    window.location.reload();
+  }
+  else if (url == 'https://raw.githubusercontent.com/dgguarin20/webdata/main/Empresa_year.csv')
+  {
+    url ='https://raw.githubusercontent.com/dgguarin20/webdata/main/Empresa.csv';
+    window.sessionStorage.setItem("url", url);
+    window.location.reload();
+  }
+  else if (url == 'https://raw.githubusercontent.com/dgguarin20/webdata/main/Departamento_year.csv') {
+
+    url = 'https://raw.githubusercontent.com/dgguarin20/webdata/main/Departamento.csv';
+    window.sessionStorage.setItem("url", url);
+    window.location.reload();
+  }
+  else if (url == 'https://raw.githubusercontent.com/dgguarin20/webdata/main/Campo_year.csv') {
+
+    url = 'https://raw.githubusercontent.com/dgguarin20/webdata/main/Campo.csv';
+    window.sessionStorage.setItem("url", url);
+    window.location.reload();
+  }
+  else if (url == 'https://raw.githubusercontent.com/dgguarin20/webdata/main/Contrato_year.csv') {
+    url = 'https://raw.githubusercontent.com/dgguarin20/webdata/main/Contrato.csv';
+    window.sessionStorage.setItem("url", url);
+    window.location.reload();
+  }
+
+
+
+
+
+}
+
+      async function getData(){
+        const response = await fetch(url);
+        const data = await response.text();
+
+        const variable = data.split('\n');
+        const varie = variable[0].split(',');
+
+        nombre = varie[numColumna];
+
+        const rows = data.split('\n').slice(1);
+        dropdown.push("Escoje uno");
+        dropdown.push(varie[1]);
+
+        for(var i = 1; i <= varie.length; i++)
+        {
+          dropdown.push(varie[i]);
+        }
+        rows.forEach(elt => {
+          const row = elt.split(',');
+          const departamento = row[0];
+          xlabels.push(departamento);
+          const yvalues = row[numColumna];
+          ytemps.push(yvalues);
+
+        });
+      }
+
+
+
+
+
+
+    </script>
+
+  </body>
+</html>
